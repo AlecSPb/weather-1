@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView(
                         children: [
                           DrawerHeader(
-                            child: Text('Drawer Header'),
+                            child: Text('Quick Weather'),
                           ),
                           GestureDetector(
                             onTap: () {
