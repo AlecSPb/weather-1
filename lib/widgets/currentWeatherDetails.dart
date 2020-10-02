@@ -5,7 +5,8 @@ import 'package:weather/models/weatherModel.dart';
 
 class CurrentWeatherDetails extends StatefulWidget {
   final GetWeatherClass currentWeather;
-  CurrentWeatherDetails({this.currentWeather});
+  final bool isMetric;
+  CurrentWeatherDetails({this.currentWeather, this.isMetric});
 
   @override
   _CurrentWeatherDetailsState createState() => _CurrentWeatherDetailsState();
@@ -37,7 +38,9 @@ class _CurrentWeatherDetailsState extends State<CurrentWeatherDetails> {
       "SUNSET": "$sunSetTime",
       "PRESSURE": "$pressure hPa",
       "HUMIDITY": "$humidity%",
-      "WIND SPEED": "${windSpd.toStringAsFixed(2)} km/h",
+      "WIND SPEED": widget.isMetric
+          ? "${windSpd.toStringAsFixed(2)} km/h"
+          : "${(windSpd / 1.7).toStringAsFixed(2)} mph",
       "CLOUDS": "$clouds%",
     };
 

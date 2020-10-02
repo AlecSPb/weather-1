@@ -15,7 +15,8 @@ class DailyForecast extends StatefulWidget {
   String areaName;
   bool isDayTime;
   final onRefresh;
-  DailyForecast({this.areaName, this.isDayTime, this.onRefresh});
+  final bool isMetric;
+  DailyForecast({this.areaName, this.isDayTime, this.onRefresh, this.isMetric});
   @override
   _DailyForecastState createState() => _DailyForecastState();
 }
@@ -53,8 +54,12 @@ class _DailyForecastState extends State<DailyForecast> {
         int start = index + 1;
         var dateTime = dailyList[start].dt;
         var _weather = dailyList[start].weather[0].main;
-        var _dailyMax = dailyList[start].temp.max - 273;
-        var _dailyMin = dailyList[start].temp.min - 273;
+        var _dailyMax = widget.isMetric
+            ? dailyList[start].temp.max - 273
+            : (dailyList[start].temp.max * (9 / 5) - 459).round();
+        var _dailyMin = widget.isMetric
+            ? dailyList[start].temp.min - 273
+            : (dailyList[start].temp.min * (9 / 5) - 459).round();
         var date = new DateTime.fromMillisecondsSinceEpoch(dateTime * 1000);
         var dateFinal = DateFormat.Md().format(date);
         dailyDayDate = DateFormat.E().format(date);
@@ -79,7 +84,9 @@ class _DailyForecastState extends State<DailyForecast> {
           "SUNSET": "$sunSetTime",
           "PRESSURE": "$pressure hPa",
           "HUMIDITY": "$humidity%",
-          "WIND SPEED": "${windSpd.toStringAsFixed(2)} km/h",
+          "WIND SPEED": widget.isMetric
+              ? "${windSpd.toStringAsFixed(2)} km/h"
+              : "${(windSpd / 1.7).toStringAsFixed(2)} mph",
           "CHANCE OF RAIN": "${rainProb.round()}%",
         };
 

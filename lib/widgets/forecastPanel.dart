@@ -3,12 +3,13 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/models/forecastModel.dart';
-import 'package:weather/screens/settingsScreen.dart';
+import 'package:weather/screens/homescreen.dart';
 
 class ForecastPanel extends StatefulWidget {
   final List<ListElement> forecast;
   final bool isDayTime;
-  ForecastPanel({this.forecast, this.isDayTime});
+  final bool isMetric;
+  ForecastPanel({this.forecast, this.isDayTime, this.isMetric});
   @override
   _ForecastPanelState createState() => _ForecastPanelState();
 }
@@ -56,7 +57,9 @@ class _ForecastPanelState extends State<ForecastPanel> {
       "PRESSURE": "$pressure hPa",
       "HUMIDITY": "$humidity%",
       "CLOUDS": "$clouds%",
-      "WIND SPEED": "${windSpd.toStringAsFixed(2)} km/h",
+      "WIND SPEED": widget.isMetric
+          ? "${windSpd.toStringAsFixed(2)} km/h"
+          : "${(windSpd / 1.7).toStringAsFixed(2)} mph",
       "CHANCE OF RAIN": "${rainProb.toStringAsFixed(0)}%",
     };
     final detailNameMetric = forecastDetailsMapMetric.keys.toList();
@@ -97,9 +100,7 @@ class _ForecastPanelState extends State<ForecastPanel> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isMetric
-                          ? detailNameMetric[index].toString()
-                          : detailNameImp[index].toString(),
+                      detailNameMetric[index].toString(),
                       style: GoogleFonts.quicksand(
                         color: widget.isDayTime
                             ? Colors.amber[700]
@@ -109,9 +110,7 @@ class _ForecastPanelState extends State<ForecastPanel> {
                       ),
                     ),
                     Text(
-                      isMetric
-                          ? detailMetric[index].toString()
-                          : detailImp[index].toString(),
+                      detailMetric[index].toString(),
                       style: GoogleFonts.quicksand(
                         color: widget.isDayTime
                             ? Colors.amber[700]

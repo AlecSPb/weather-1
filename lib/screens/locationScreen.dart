@@ -27,12 +27,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(),
-                ),
-              );
+              Navigator.pop(context);
             },
           ),
           centerTitle: true,

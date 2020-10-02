@@ -20,7 +20,7 @@ import 'package:weather/screens/dailyForecastScreen.dart';
 import 'package:weather/screens/loadingScreen.dart';
 import 'package:weather/screens/locationScreen.dart';
 import 'package:weather/screens/noInternetScreen.dart';
-import 'package:weather/screens/settingsScreen.dart';
+//import 'package:weather/screens/settingsScreen.dart';
 import 'package:weather/widgets/currentWeatherDetails.dart';
 import 'package:weather/widgets/forecastPanel.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -54,10 +54,16 @@ String dailyDayDate;
 double screenHeight;
 double screenWidth;
 double listheight;
+List<String> toggle = ['\u00B0C', '\u00B0F'];
 
 int kelvinFactor;
 
 var icon;
+
+bool isMetric;
+bool boolValue;
+
+int unitIndex;
 
 PageController forecastDetailsController = new PageController();
 RefreshController refreshController = RefreshController(initialRefresh: false);
@@ -179,7 +185,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (boolValue == null) {
       setState(() {
         isMetric = true;
+        unitIndex = 0;
       });
+
+      if (isMetric == true) {
+        setState(() {
+          unitIndex = 0;
+        });
+      } else if (isMetric == false) {
+        unitIndex = 1;
+      }
     }
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -223,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    print(boolValue.toString());
     checkBoolValue();
     setState(() {
       isLoading = true;
@@ -231,6 +247,100 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedIndex = 0;
     });
     bootSequence();
+  }
+
+  changeUnit() async {
+    if (unitIndex == 0) {
+      setState(() {
+        isMetric = true;
+      });
+    } else if (unitIndex == 1) {
+      setState(() {
+        isMetric = false;
+      });
+    }
+    print(isMetric.toString());
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isMetric', isMetric);
+    await prefs.setInt('selectedIndex', isMetric ? 0 : 1);
+    boolValue = prefs.getBool('isMetric');
+    print(boolValue.toString());
+    //intValue = prefs.getInt('selectedIndex');
+  }
+
+  Widget unitSelector() {
+    return ClipRRect(
+      borderRadius: BorderRadius.all(
+        Radius.circular(30),
+      ),
+      child: Container(
+        height: screenHeight * 0.05,
+        decoration: BoxDecoration(
+          //color: Colors.red,
+          borderRadius: BorderRadius.all(
+            Radius.circular(30),
+          ),
+        ),
+        child: Container(
+          //padding: EdgeInsets.symmetric(vertical: 50),
+          height: screenHeight * 0.05,
+          width: screenWidth * 0.24,
+
+          child: ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            itemCount: toggle.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    unitIndex = index;
+                  });
+                  changeUnit();
+                  print(
+                    index.toString(),
+                  );
+                },
+                child: Container(
+                  height: screenHeight * 0.07,
+                  width: screenWidth * 0.12,
+                  decoration: BoxDecoration(
+                      /*border: Border.all(
+                                width: selectedIndex == index ? 3 : 1,
+                              ),*/
+                      color: isDayTime
+                          ? unitIndex == index
+                              ? Colors.amber[100]
+                              : Colors.transparent
+                          : selectedIndex == index
+                              ? Colors.deepPurple[100]
+                              : Colors.transparent),
+                  child: Center(
+                    child: Text(
+                      toggle[index].toString(),
+                      style: GoogleFonts.quicksand(
+                        fontSize: screenHeight * 0.025,
+                        fontWeight: unitIndex == index
+                            ? FontWeight.bold
+                            : FontWeight.w200,
+                        color: isDayTime
+                            ? unitIndex == index
+                                ? Colors.amber[800]
+                                : Colors.amber[50]
+                            : unitIndex == index
+                                ? Colors.deepPurple[800]
+                                : Colors.deepPurple[50],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -251,49 +361,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Scaffold(
                     extendBodyBehindAppBar: true,
                     appBar: AppBar(
-                      centerTitle: true,
+                      // centerTitle: true,
                       elevation: 0,
                       backgroundColor: Colors.transparent,
-                      title: Text(
-                        currentWeather.name,
-                        style: GoogleFonts.quicksand(
-                          color: Colors.white,
-                          fontSize: screenHeight * 0.02717,
-                        ),
-                      ),
-                      actions: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LocationsScreen(
-                                  isDayTime: isDayTime,
+                      title: Container(
+                        padding: EdgeInsets.only(left: 13, top: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              //padding: EdgeInsets.only(left),
+                              child: Text(
+                                "${currentWeather.name} ",
+                                style: GoogleFonts.quicksand(
+                                  color: Colors.white,
+                                  fontSize: screenHeight * 0.035,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.only(
-                                top: 10, right: 20, left: 20, bottom: 10),
-                            child: Text(
-                              '+',
-                              style: GoogleFonts.quicksand(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.04,
-                              ),
                             ),
-                          ),
+                            Icon(
+                              Icons.location_on,
+                            ),
+                            /*Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white,
+                            ),*/
+                            Spacer(),
+                            Container(
+                              child: unitSelector(),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                    drawer: Drawer(
+                    /* drawer: Drawer(
                       child: ListView(
                         children: [
                           DrawerHeader(
                             child: Text('Quick Weather'),
                           ),
-                          GestureDetector(
+                          /* GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -308,10 +416,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               title: Text('Settings'),
                               leading: Icon(Icons.settings),
                             ),
-                          ),
+                          ),*/
                         ],
                       ),
-                    ),
+                    ),*/
                     body: SlidingUpPanel(
                       backdropEnabled: true,
                       backdropOpacity: 0.2,
@@ -327,6 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       panel: ForecastPanel(
                         forecast: forecastList,
                         isDayTime: isDayTime,
+                        isMetric: isMetric,
                       ),
                       body: Container(
                         padding: EdgeInsets.only(
@@ -595,29 +704,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         isDayTime: isDayTime,
                                                         areaName:
                                                             currentWeather.name,
+                                                        isMetric: isMetric,
                                                       ),
                                                     ),
                                                   );
                                                 },
                                                 child: Container(
                                                   padding:
-                                                      EdgeInsets.only(left: 25),
+                                                      EdgeInsets.only(left: 10),
                                                   child: Container(
-                                                    /*decoration: BoxDecoration(
-                                                    border: Border(
-                                                      bottom: BorderSide(
-                                                        color: Colors.white54,
-                                                        width: 1,
-                                                      ),
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 11,
+                                                            vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white54,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30),
                                                     ),
-                                                  ),*/
                                                     child: Text(
                                                       "Next 7 days >",
                                                       style:
                                                           GoogleFonts.quicksand(
-                                                        color: Colors.white,
-                                                        fontSize: screenHeight *
-                                                            0.023,
+                                                        color: isDayTime
+                                                            ? Colors.amber[800]
+                                                            : Colors.deepPurple[
+                                                                800],
+                                                        fontSize:
+                                                            screenHeight * 0.02,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
                                                     ),
                                                   ),
@@ -644,6 +761,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: CurrentWeatherDetails(
                                     currentWeather: currentWeather,
+                                    isMetric: isMetric,
                                   ),
                                 ),
                               ],
